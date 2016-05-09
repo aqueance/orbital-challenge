@@ -8,12 +8,12 @@
 
 'use strict';
 
-const Geometry = require('./geometry');
+const Point = require('./geometry').Point;
 
 /*
  * A named location in space.
  */
-class Location extends Geometry.Point {
+class Location extends Point {
 
     constructor(name, coordinates) {
         super(coordinates);

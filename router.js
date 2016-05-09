@@ -46,7 +46,7 @@
  *     4. Set [node] to that element.
  *     5. Add [node] to the beginning of [path].
  */
-module.exports = function route(details, log) {
+module.exports = function route(trace, details) {
     var source = new Node(details.source);
     var target = new Node(details.target);
 
@@ -64,7 +64,7 @@ module.exports = function route(details, log) {
             .filter(node.visible.bind(node))
             .map(node.connect.bind(node));
 
-        if (log && visible.length) log(node.point.name, '<', visible.map(node => node.point.name));
+        if (trace && visible.length) trace(node.point.name, '<', visible.map(node => node.point.name));
         return visible.length;
     }
 
@@ -73,7 +73,7 @@ module.exports = function route(details, log) {
 
         [ frontier, outskirts ] = divide(outskirts, reachable);
 
-        if (log) log();
+        if (trace) trace();
     } while (frontier.length);
 
     var node = target;

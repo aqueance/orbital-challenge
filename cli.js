@@ -10,32 +10,51 @@
 
 'use strict';
 
-if (process.argv.length < 3) {
-    console.info('Please specify the challenge data file name');
-    process.exit(-1);
+var argument = process.argv[2];
+
+if (argument === '-h' || argument === '-?' || argument === '--help') {
+    const deployment = require('./package');
+
+    const name = process.argv[1].split('/');
+    console.info(deployment.description);
+    console.info();
+    console.info('Usage with a specific data file:');
+    console.info();
+    console.info('  ', name[name.length - 1], '<data file>');
+    console.info();
+    console.info('Usage with a random data file:');
+    console.info();
+    console.info('  ', 'curl -s \'https://space-fast-track.herokuapp.com/generate\' |', name[name.length - 1]);
+    console.info();
+    process.exit();
 }
 
 const TRACE = false;
 
 const fs = require('fs');
-const content = fs.readFileSync(process.argv[2], { encoding: 'utf8' });
-
-const parse = require('./parser').parse;
-const route = require('./router');
 
 const trace = (TRACE ? console.log : null);
 
-const configuration = parse(content, trace);
+const read = require('./reader');
+const parse = require('./parser').parse;
+const route = require('./router').bind(null, trace);
 
-console.info(configuration.comments.join('\n'));
-if (trace) trace();
+read(argument)
+    .then(parse)
+    .then(configuration => {
+        console.info(configuration.comments.join('\n'));
+        if (trace) trace();
 
-const path = route(configuration, trace);
-if (trace) trace();
+        return route(configuration);
+    }).then(path => {
+        if (trace) trace();
 
-if (!path) {
-    console.info('No route found');
-} else {
-    console.info(path.map(node => node.point.name).join(' > '));
-}
+        if (!path) {
+            console.info('No route found');
+        } else {
+            console.info(path.map(node => node.point.name).join(' > '));
+        }
+    })
+    .catch(console.error);
+
 

@@ -1,7 +1,7 @@
 {
   "name": "@aqueance/orbital-challenge",
   "version": "1.0.0",
-  "description": "Submission for Reaktor's Orbital Challenge",
+  "description": "Reaktor's Orbital Challenge: https://reaktor.com/orbital-challenge/",
   "author": "Tibor Adam Varga",
   "license": "UNLICENSED",
   "private": true,
