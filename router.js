@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Copyright © Tibor Adam Varga. All rights reserved.
  */
@@ -10,105 +8,15 @@
 
 'use strict';
 
-const Geometry = require('./geometry');
-
-const TRACE = false;
-
-if (process.argv.length < 3) {
-    console.info('Please specify the challenge data file name');
-    process.exit(-1);
-}
-
-Object.defineProperties(Array.prototype, {
-    divide: {
-        value: function(predicate) {
-            var truthy = [];
-            var falsy = [];
-
-            for (var i = 0, ii = this.length; i < ii; ++i) {
-                var item = this[i];
-                (predicate(item) ? truthy : falsy).push(item);
-            }
-
-            return [ truthy, falsy ];
-        }
-    }
-});
-
-function Location(name, coordinates) {
-    Object.defineProperties(this, {
-        name: { value: name }
-    });
-
-    Geometry.Point.call(this, coordinates);
-}
-
-Location.prototype = Object.create(Geometry.Point.prototype);
-
-const configuration = (function(contents) {
-    var satellites = [];
-    var source = null;
-    var target = null;
-
-    contents.split('\n').forEach(function(line) {
-        if (!~line.indexOf('#')) {
-            var parts = line.split(/,\s*/);
-            var type = parts.shift();
-
-            if (type === 'ROUTE') {
-                source = new Location('SOURCE', parts.slice(0, 2));
-                target = new Location('TARGET', parts.slice(2, 4));
-            } else {
-                satellites.push(new Location(type, parts));
-            }
-        }
-    });
-
-    return new ChallengeDetails(source, target, satellites);
-})(require('fs').readFileSync(process.argv[2], { encoding: 'utf8' }));
-
-function ChallengeDetails(source, target, satellites) {
-    Object.defineProperties(this, {
-        source: { value: source },
-        target: { value: target },
-        satellites: { value: satellites }
-    });
-}
-
-ChallengeDetails.prototype = Object.create(Object.prototype);
-
-function Node(point) {
-    Object.defineProperties(this, {
-        point: { value: point },
-        edges: { value: [] }
-    });
-}
-
-Node.prototype = Object.create(Object.prototype, {
-    visible: {
-        value: function(that) {
-            return this.point.visible(that.point);
-        }
-    },
-    connect: {
-        value: function(that) {
-            this.edges.push(that);
-            return that;
-        }
-    }
-});
-
-route(configuration);
-
 /*
  * This function finds the shortest route from [details.source] to [details.target]
  * with the least number of hops over [details.satellites].
  *
- * The algorithm works in two distinct phases:
+ * The algorithm works in two phases:
  *  1. finding the possible routes from [details.source] forward over [details.satellites]
  *     toward [details.target], and then
  *  2. moving backward from [details.target] toward [details.source] over the possible
- *     routes and selecting among them the one with the shortest physical distance.
+ *     routes and selecting the one with the shortest physical distance.
  *
  * The possible routes are explored using the following algorithm:
  *  1. Set [frontier] to be [details.source].
@@ -138,7 +46,7 @@ route(configuration);
  *     4. Set [node] to that element.
  *     5. Add [node] to the beginning of [path].
  */
-function route(details) {
+module.exports = function route(details, log) {
     var source = new Node(details.source);
     var target = new Node(details.target);
 
@@ -156,16 +64,16 @@ function route(details) {
             .filter(node.visible.bind(node))
             .map(node.connect.bind(node));
 
-        if (TRACE && visible.length) console.log(node.point.name, '<', visible.map(node => node.point.name));
+        if (log && visible.length) log(node.point.name, '<', visible.map(node => node.point.name));
         return visible.length;
     }
 
     do {
         if (reachable(target)) break;
 
-        [ frontier, outskirts ] = outskirts.divide(reachable);
+        [ frontier, outskirts ] = divide(outskirts, reachable);
 
-        if (TRACE) console.log('---');
+        if (log) log();
     } while (frontier.length);
 
     var node = target;
@@ -183,9 +91,43 @@ function route(details) {
         path.unshift(node);
     }
 
-    if (path.length === 1) {
-        console.error('No route found');
-    } else {
-        console.info(path.map(node => node.point.name).join(' > '));
+    return path.length === 1 ? null : path;
+};
+
+/*
+ * Splits the contents of [list] into two lists based on
+ * what [predicate] returns for each element of [list].
+ */
+function divide(list, predicate) {
+    var truthy = [];
+    var falsy = [];
+
+    for (var i = 0, ii = list.length; i < ii; ++i) {
+        var item = list[i];
+        (predicate(item) ? truthy : falsy).push(item);
+    }
+
+    return [ truthy, falsy ];
+}
+
+/*
+ * Represents a node in a directed graph.
+ *
+ * The node has a Point and an list of other Nodes to represent edges.
+ */
+class Node {
+
+    constructor(point) {
+        this.point = point;
+        this.edges = [];
+    }
+
+    visible(that) {
+        return this.point.visible(that.point);
+    }
+
+    connect(that) {
+        this.edges.push(that);
+        return that;
     }
 }

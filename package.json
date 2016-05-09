@@ -6,14 +6,16 @@
   "license": "UNLICENSED",
   "private": true,
   "files": [
-    "router.js",
-    "geometry.js"
+    "cli.js",
+    "parser.js",
+    "geometry.js",
+    "router.js"
   ],
   "bin": {
-    "comsat": "router.js"
+    "comsat": "cli.js"
   },
   "scripts": {
-    "lint": "jshint --verbose **/*.js",
+    "lint": "jshint --verbose **.js",
     "pretest": "npm run lint",
     "test": "jasmine"
   },

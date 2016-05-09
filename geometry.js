@@ -84,31 +84,26 @@ function length_2(u) {
  * with [x0] chosen as the origin of the coordinate system,
  * and using [t] without negation or division.
  */
-function visible(u, v, radius2) {
+function _visible(u, v, radius2) {
     var d = difference(v, u);
     var l2d = length_2(d);
     var t = dot_product(d, u);
     return t > 0 || t < -l2d || length_2(cross_product(u, v)) > l2d * radius2;
 }
 
-function Point(coordinates) {
-    Object.defineProperties(this, {
-        coordinates: { value: spherical2cartesian(coordinates, RADIUS, ACCURACY) }
-    });
-}
-
-Point.prototype = Object.create(Object.prototype, {
-    visible: {
-        value: function(point) {
-            return visible(this.coordinates, point.coordinates, RADIUS_2);
-        }
-    },
-    distance: {
-        value: function(that) {
-            return Math.sqrt(length_2(difference(this.coordinates, that.coordinates)));
-        }
+class Point {
+    constructor(coordinates) {
+        this.coordinates = spherical2cartesian(coordinates, RADIUS, ACCURACY);
     }
-});
+
+    visible(point) {
+        return _visible(this.coordinates, point.coordinates, RADIUS_2);
+    }
+
+    distance(that) {
+        return Math.sqrt(length_2(difference(this.coordinates, that.coordinates)));
+    }
+}
 
 module.exports = Object.create(null, {
     ORIGIN: { value: ORIGIN, enumerable: true },
@@ -122,7 +117,7 @@ module.exports = Object.create(null, {
             cross_product: { value: cross_product, enumerable: true },
             dot_product: { value: dot_product, enumerable: true },
             length_2: { value: length_2, enumerable: true },
-            visible: { value: visible, enumerable: true }
+            visible: { value: _visible, enumerable: true }
         })
     }
 });
