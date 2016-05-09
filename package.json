@@ -1,0 +1,28 @@
+{
+  "name": "@aqueance/orbital-challenge",
+  "version": "1.0.0",
+  "description": "Submission for Reaktor's Orbital Challenge",
+  "author": "Tibor Adam Varga",
+  "license": "UNLICENSED",
+  "private": true,
+  "files": [
+    "router.js",
+    "geometry.js"
+  ],
+  "bin": {
+    "comsat": "router.js"
+  },
+  "scripts": {
+    "lint": "jshint --verbose **/*.js",
+    "pretest": "npm run lint",
+    "test": "jasmine"
+  },
+  "engines": {
+    "node": ">=6",
+    "npm": ">=3"
+  },
+  "devDependencies": {
+    "jasmine": "^2",
+    "jshint": "^2"
+  }
+}
