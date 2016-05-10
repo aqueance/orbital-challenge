@@ -37,24 +37,19 @@ const trace = (TRACE ? console.log : null);
 
 const read = require('./reader');
 const parse = require('./parser').parse;
-const route = require('./router').bind(null, trace);
+const Router = require('./router');
 
 read(argument)
     .then(parse)
     .then(configuration => {
         console.info(configuration.comments.join('\n'));
-        if (trace) trace();
 
-        return route(configuration);
-    }).then(path => {
-        if (trace) trace();
+        const router = new Router(configuration.satellites);
 
-        if (!path) {
-            console.info('No route found');
-        } else {
-            console.info(path.map(node => node.point.name).join(' > '));
-        }
+        if (trace) trace();
+        const route = router.route(configuration.source, configuration.target, trace);
+
+        if (trace) trace();
+        console.info(!route ? 'No route found' : route.map(item => item.name).join(' > '));
     })
     .catch(console.error);
-
-

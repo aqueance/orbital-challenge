@@ -25,10 +25,10 @@ function angle2radians(angle) {
  *
  *   See http://keisan.casio.com/exec/system/1359534351
  */
-function spherical2cartesian(coordinates, surface, accuracy) {
+function spherical2cartesian(coordinates, surface, accuracy = 0) {
     var latitude = +coordinates[0];
     var longitude = +coordinates[1];
-    var altitude = (+coordinates[2] || 0) + (accuracy || 0);   // elevate things off the surface to make sure lines (of sight) don't touch it
+    var altitude = (+coordinates[2] || 0) + accuracy;   // elevate things off the surface to make sure lines (of sight) don't touch it
 
     var θ = angle2radians(longitude);
     var φ = angle2radians(90 - latitude);
@@ -75,7 +75,7 @@ function length_2(u) {
 /*
  * Tells if there is a line segment between points [u] and [v]
  * that does not touch or cross a sphere with [radius2]^0.5 radius
- * centered at the origin.
+ * centered at the origin, which is assumed to be at (0, 0, 0).
  *
  * Degenerate cases when [u] or [v] is at or within [radius2]^0.5
  * distance from the origin are not accounted for.

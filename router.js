@@ -9,53 +9,104 @@
 'use strict';
 
 /*
- * This function finds the shortest route from [details.source] to [details.target]
- * with the least number of hops over [details.satellites].
+ * Routes between a source and a target through a set of relays.
+ */
+class Router {
+
+    constructor(relays) {
+        this.relays = relays;
+    }
+
+    route(source, target, trace) {
+        return _route(trace, source, target, this.relays);
+    }
+}
+
+module.exports = Router;
+
+/*
+ * Represents a node in a directed graph.
+ *
+ * The node has a Point and an list of other Nodes to represent edges.
+ */
+class Node {
+
+    constructor(point) {
+        this.point = point;
+        this.edges = [];
+    }
+
+    visible(that) {
+        return this.point.visible(that.point);
+    }
+
+    connect(that) {
+        this.edges.push(that);
+        return that;
+    }
+}
+
+/*
+ * This function finds the shortest route from [_source] to [_target]
+ * with the least number of hops over [_relays].
+ *
+ * Returns [null] if no path found, else return the path as a list of names,
+ * starting with that of [_source] and ending with that of [_target], and a
+ * potentially empty list of names from [_relays].
+ *
+ * All of [_source], [_target], and each element of [_relays] have a visible()
+ * method that tests the commutative reachability between the method target
+ * and its argument.
+ *
+ * Similarly, all of the above must have a connect() method to record the fact
+ * that the method target and the method argument are directly reachable from
+ * one another.
  *
  * The algorithm works in two phases:
- *  1. finding the possible routes from [details.source] forward over [details.satellites]
- *     toward [details.target], and then
- *  2. moving backward from [details.target] toward [details.source] over the possible
- *     routes and selecting the one with the shortest physical distance.
+ *  1. first moving forward from [_source] toward [_target] over [_relays]
+ *     in steps and recording the ones reachable from the relays found in the
+ *     last step,
+ *  2. the moving backward from [_target] toward [_source] over the possible
+ *     routes found and selecting the one with the shortest distance at each
+ *     hop.
  *
- * The possible routes are explored using the following algorithm:
- *  1. Set [frontier] to be [details.source].
- *  2. Set [outskirts] to be [details.satellites].
- *  3. Repeat the following steps:
- *     1. Find all elements in [frontier] that can reach [details.target].
- *     2. Add each hit to the list of positions that can directly reach [details.target].
- *     3. If any such element is found, go to second phase of the full algorithm.
- *     4. Find all satellites in [outskirts] that are reachable from any
+ * Phase 1: the possible routes are explored using the following algorithm:
+ *  1. Set [frontier] to be a list with [_source] as its only element.
+ *  2. Set [outskirts] to be [_relays].
+ *  3. If [frontier] is not empty, repeat:
+ *     a. Find all elements in [frontier] that can directly reach [_target].
+ *     b. Add each hit to the list of nodes that can directly reach [_target].
+ *     c. If any such element is found, skip to Phase 2.
+ *     d. Find all satellites in [outskirts] that are reachable from any
  *        element in [frontier].
- *     4. Add each hit to the list of positions that can directly reach that element.
- *     5. Set [frontier] to the list of satellites thus found.
- *     6. Remove [frontier] from [outskirts].
- *     7. If [frontier] is not empty, go to step 3.
+ *     e. Add each hit to the list of nodes that can directly reach that
+ *        element.
+ *     f. Set [frontier] to the list of satellites thus found.
+ *     g. Remove [frontier] from [outskirts].
+ *     h. Go to step 3.
+ *  4. Conclude that there is no viable route.
  *
- * If [details.target] has not been reached, conclude that there is no viable route.
- *
- * If [details.target] has been reached, compute the shortest route by the following
- * algorithm:
- *  1. Set [node] to be [details.target].
+ * Phase 2: compute a route by the following algorithm:
+ *  1. Set [node] to be [_target].
  *  2. Set [path] to be a list with [node] as its only element.
- *  3. If [node] has elements added in step 3.2 or 3.4 in the first phase, repeat
- *     the following steps:
- *     1. Compute the distance from [node] to all elements found.
- *     2. Find the smallest distance among them.
- *     3. Select the element with the shortest distance thereto.
- *     4. Set [node] to that element.
- *     5. Add [node] to the beginning of [path].
+ *  3. If [node] has elements added in step 3.b or 3.e in the Phase 1,
+ *     repeat:
+ *     a. Compute the distance from [node] to all elements added to that node.
+ *     b. Find the shortest distance among them.
+ *     c. Select the element with the shortest distance thereto.
+ *     d. Set [node] to that element.
+ *     e. Add [node] to the beginning of [path].
  */
-module.exports = function route(trace, details) {
-    var source = new Node(details.source);
-    var target = new Node(details.target);
+function _route(trace, _source, _target, _relays) {
+    var source = new Node(_source);
+    var target = new Node(_target);
 
     var frontier = [ source ];
-    var outskirts = details.satellites.map(point => new Node(point));
+    var outskirts = _relays.map(point => new Node(point));
 
     /*
      * This function finds all nodes in [frontier] that can directly reach [node]
-     * and connects those nodes with [node].
+     * and connects with [node] those found.
      *
      * Returns the number of hits.
      */
@@ -91,8 +142,8 @@ module.exports = function route(trace, details) {
         path.unshift(node);
     }
 
-    return path.length === 1 ? null : path;
-};
+    return path.length === 1 ? null : path.map(node => node.point);
+}
 
 /*
  * Splits the contents of [list] into two lists based on
@@ -102,32 +153,10 @@ function divide(list, predicate) {
     var truthy = [];
     var falsy = [];
 
-    for (var i = 0, ii = list.length; i < ii; ++i) {
+    for (let i = 0, ii = list.length; i < ii; ++i) {
         var item = list[i];
         (predicate(item) ? truthy : falsy).push(item);
     }
 
     return [ truthy, falsy ];
-}
-
-/*
- * Represents a node in a directed graph.
- *
- * The node has a Point and an list of other Nodes to represent edges.
- */
-class Node {
-
-    constructor(point) {
-        this.point = point;
-        this.edges = [];
-    }
-
-    visible(that) {
-        return this.point.visible(that.point);
-    }
-
-    connect(that) {
-        this.edges.push(that);
-        return that;
-    }
 }
