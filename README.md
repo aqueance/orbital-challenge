@@ -44,7 +44,7 @@ The algorithm is fully described in [`router.js`](https://github.com/aqueance/fl
 
 Assuming the geometry formulae are correct, the algorithm finds the route with the least number of hops, and although the algorithm is biased toward shorter hops, the route returned is not necessarily the shortest possible one.
 
-The algorithm is rather trivial, and properly implementing coordinate geometry formulae, beautifying the code, and polishing the design took much longer than implementing the algorithm itself – much less coming up with it.
+The algorithm is rather trivial, and properly implementing the coordinate geometry formulae, beautifying the code, and polishing the design took much longer than implementing the algorithm itself – much less coming up with it.
 
   [Node]: <https://nodejs.org/en/>
 

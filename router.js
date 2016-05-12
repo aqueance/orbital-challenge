@@ -13,7 +13,7 @@
  */
 class Router {
 
-    constructor(relays) {
+    constructor(...relays) {
         this.relays = relays;
     }
 
@@ -28,6 +28,11 @@ module.exports = Router;
  * Represents a node in a directed graph.
  *
  * The node has a Point and an list of other Nodes to represent edges.
+ *
+ * The Point object has to have:
+ *  - a .name property
+ *  - a .visible(point: Point): boolean method
+ *  - a .distance(point: Point): number method
  */
 class Node {
 

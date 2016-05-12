@@ -44,7 +44,7 @@ read(argument)
     .then(configuration => {
         console.info(configuration.comments.join('\n'));
 
-        const router = new Router(configuration.satellites);
+        const router = new Router(...configuration.satellites);
 
         if (trace) trace();
         const route = router.route(configuration.source, configuration.target, trace);
