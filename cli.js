@@ -10,11 +10,10 @@
 
 'use strict';
 
-var short = false;
-var argument = process.argv[2];
+const SHORT_PARAM = '--short';
+const FAST_PARAM = '--fast';
 
-if (argument === '-h' || argument === '-?' || argument === '--help') {
-    const name = process.argv[1].split('/');
+function usage() {
     const deployment = require('./package');
 
     console.info(deployment.description, '- v' + deployment.version);
@@ -29,15 +28,39 @@ if (argument === '-h' || argument === '-?' || argument === '--help') {
     console.info();
     console.info('Options:');
     console.info();
-    console.info(' ', '--short: Selects the shortest path algorithm over the default least hops');
-    console.info(' ', '         algorithm.');
+    console.info(' ', `-h, -?, --help  Print this text and terminates.`);
+    console.info();
+    console.info(' ', `${SHORT_PARAM}         Selects the shortest path algorithm over the default least`);
+    console.info(' ', `                hops algorithm.`);
+    console.info();
+    console.info(' ', `${FAST_PARAM}:         Selects the fast algorithm over the default least hops.`);
+    console.info(' ', `                algorithm.`);
     console.info();
     process.exit();
-} else if (argument === '--short') {
-    short = true;
-    argument = process.argv[3];
 }
 
+var short = false;
+var fast = false;
+
+const parameters = process.argv;
+parameters.shift();
+
+const name = parameters.shift().split('/');
+for (var argument = parameters.shift(); argument && !argument.indexOf('-'); argument = parameters.shift()) {
+
+    if (argument === '-h' || argument === '-?' || argument === '--help') {
+        usage();
+    } else if (argument === SHORT_PARAM) {
+        short = true;
+    } else if (argument === FAST_PARAM) {
+        fast = true;
+    }
+}
+
+if (fast && short) {
+    console.info(`Only one of ${SHORT_PARAM} and ${FAST_PARAM} can be specified.`);
+    process.exit();
+}
 
 const TRACE = false;
 
@@ -55,7 +78,7 @@ read(argument)
     .then(configuration => {
         console.info(configuration.comments.join('\n'));
 
-        const router = factory[short ? routers.SHORTEST_PATH : routers.LEAST_HOPS](...configuration.satellites);
+        const router = factory[short ? routers.SHORTEST_PATH : fast ? routers.FAST : routers.LEAST_HOPS](...configuration.satellites);
 
         if (trace) trace();
         const route = router.route(configuration.source, configuration.target, trace);

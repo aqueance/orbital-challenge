@@ -40,17 +40,28 @@ $ <install path>/bin/comsat -h
 
 ## Solution
 
-Two algorithms have been implemented:
+Three algorithms have been implemented:
 
-  1. *Least Hops*: finds the route with the least number of hops with some total distance, and
+  1. *Fast*: finds the route with the least number of hops with some total distance,
+  1. *Least Hops*: finds the route with the least number of hops and shortest total distance, and
   1. *Shortest Path*: finds the shortest route and the least number of hops.
 
-The Least Hops algorithm completes in much fewer steps in general but may give suboptimal results in terms of total distance along the route, while the Shortest Path algorithm performs an exhaustive search over all possible paths and so it returns an optimal route, albeit at the expense of much more computation.
+The *Fast* algorithm finds all routes with the least number of hops, and returns one of the routes found. The algorithm generally completes in fewer steps than the other algorithms but may give suboptimal results in terms of total distance along the route.
 
-Every satellite is listed at most once in the returned path in both cases.
+The *Least Hops* algorithm first finds all routes with the least number of hops, and then performs an exhaustive depth first search over those routes to return the shortest one. The algorithm completes in more steps than the Fast algorithm but fewer steps than the Shortest Path algorithm, and in theory may return a longer route but I have yet to find a satellite configuration when that happens in practice.
 
-The algorithms are fully described in [`routers.js`](https://github.com/aqueance/fluid-tools/blob/master/routers.js) at the `route` method of the two `*Route` classes.
+The *Shortest Path* algorithm performs an exhaustive search over all possible paths, thus it returns an optimal route, albeit at the expense of much more computation.
 
-Both algorithms are rather trivial, and properly implementing the coordinate geometry formulae, beautifying the code, and polishing the design took much longer than implementing the algorithms themselves – much less coming up with them.
+Each satellite in the returned route is listed at most once in all cases.
+
+As to which algorithm to use in practice, that depends on the cost of processing a signal vs. the cost of sending it over a distance:
+
+  * If signal processing is the only factor to optimize for, use the *Fast* algorith.
+  * If signal processing is the dominant factor to optimize for while the total distance is of secondary importance, use the *Least Hops* algorithm.
+  * If total distance is the dominant factor to optimize for, use the *Shortest Path* algorithm.
+
+The algorithms are fully described in [`routers.js`](https://github.com/aqueance/fluid-tools/blob/master/routers.js) at the `route` method of the `*Route` classes.
+
+The algorithms are rather trivial, and properly implementing the coordinate geometry formulae, beautifying the code, and polishing the design took much longer than implementing the algorithms themselves – much less coming up with them.
 
   [Node]: <https://nodejs.org/en/>

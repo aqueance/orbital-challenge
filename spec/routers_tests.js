@@ -47,6 +47,22 @@ function names(route) {
     return !route.path ? null : route.path.map(relay => relay.name);
 }
 
+describe('fast router', function() {
+    const variant = routers.FAST;
+
+    common_router_checks(variant);
+
+    it('finds the path with fewer hops out of two routes', function() {
+        var router = factory[variant](relay('relay1', 1, 10), relay('relay2', 1, 0), relay('relay3', 2, 10, 1, 3, 4), relay('relay4', 2, 0), relay('relay5', 3, 0));
+        expect(names(router.route(relay('source', 0, 0), relay('target', 4, 0)))).toEqual(['source', 'relay1', 'relay3', 'target']);
+    });
+
+    it('finds the path with fewer hops out of three routes', function() {
+        var router = factory[variant](relay('relay0', 1, 0, 0, 2, 3), relay('relay1', 3, 10), relay('relay2', 2, 5, 1, 3, 4), relay('relay3', 4, 5), relay('relay4', 2, 0), relay('relay5', 3, 0), relay('relay6', 4, 0));
+        expect(names(router.route(relay('source', 0, 0), relay('target', 5, 0)))).toEqual(['source', 'relay0', 'relay5', 'relay6', 'target']);
+    });
+});
+
 describe('least hops router', function() {
     const variant = routers.LEAST_HOPS;
 
