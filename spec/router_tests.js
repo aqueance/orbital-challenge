@@ -42,8 +42,8 @@ function relay(name, x, y, ...reachable) {
     return new DummyRelay(name, x, y, ...reachable);
 }
 
-function names(path) {
-    return !path ? null : path.map(relay => relay.name);
+function names(route) {
+    return !route.path ? null : route.path.map(relay => relay.name);
 }
 
 describe('least hops router', function() {

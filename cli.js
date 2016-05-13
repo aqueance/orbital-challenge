@@ -10,7 +10,7 @@
 
 'use strict';
 
-var shortest = false;
+var short = false;
 var argument = process.argv[2];
 
 if (argument === '-h' || argument === '-?' || argument === '--help') {
@@ -29,12 +29,12 @@ if (argument === '-h' || argument === '-?' || argument === '--help') {
     console.info();
     console.info('Options:');
     console.info();
-    console.info(' ', '--shortest: Selects the shortest path algorithm over');
-    console.info(' ', '            the default least hops algorithm.');
+    console.info(' ', '--short: Selects the shortest path algorithm over the default least hops');
+    console.info(' ', '         algorithm.');
     console.info();
     process.exit();
-} else if (argument === '--shortest') {
-    shortest = true;
+} else if (argument === '--short') {
+    short = true;
     argument = process.argv[3];
 }
 
@@ -47,19 +47,25 @@ const trace = (TRACE ? console.log : null);
 
 const read = require('./reader');
 const parse = require('./parser').parse;
-const Routers = require('./router');
+const routers = require('./routers');
+const factory = routers.factory;
 
 read(argument)
     .then(parse)
     .then(configuration => {
         console.info(configuration.comments.join('\n'));
 
-        const router = Routers[shortest ? 'shortestPath' : 'leastHops'](...configuration.satellites);
+        const router = factory[short ? routers.SHORTEST_PATH : routers.LEAST_HOPS](...configuration.satellites);
 
         if (trace) trace();
         const route = router.route(configuration.source, configuration.target, trace);
 
         if (trace) trace();
-        console.info(!route ? 'No route found' : route.map(item => item.name).join(' > '));
+        if (!route.path) {
+            console.info('# No route found');
+        } else {
+            console.info(`#METRICS: ${route.distance.toFixed(3)} km over ${route.hops} hops`);
+            console.info(route.path.map(item => item.name).join(' > '));
+        }
     })
     .catch(console.error);

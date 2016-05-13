@@ -59,7 +59,15 @@ class Node {
 }
 
 function sanitize(path) {
-    return path.length === 1 ? null : path.map(node => node.point);
+    var no_route = path.length === 1;
+
+    return {
+        path: no_route ? null : path.map(node => node.point),
+        hops: path.length - 2,
+        distance: no_route ? -1 : path.reduce(function(distance, node, index, nodes) {
+            return !index ? distance : distance + node.point.distance(nodes[index - 1].point);
+        }, 0)
+    };
 }
 
 /*
@@ -73,12 +81,13 @@ class LeastHopsRouter {
     }
 
     /*
-     * This implementation finds route from [_source] to [_target] with the
+     * This implementation finds a route from [_source] to [_target] with the
      * least number of hops over the relays.
      *
-     * Returns [null] if no path found, else return the path as a list of
-     * names, starting with that of [_source] and ending with that of
-     * [_target], and a potentially empty list of names from the relays.
+     * Returns { path: <route>, hops: <count>, distance: <km> } with
+     * <route> set to null if no path found, else <route> is a list of names,
+     * starting with that of [_source] and ending with that of [_target], and
+     * a potentially empty list of names from the relays.
      *
      * All of [_source], [_target], and each relay must have a visible()
      * method that tests the commutative reachability between the method
@@ -204,9 +213,10 @@ class ShortestPathRouter {
     /*
      * This implementation finds a shortest route from [_source] to [_target].
      *
-     * Returns [null] if no path found, else return the path as a list of
-     * names, starting with that of [_source] and ending with that of
-     * [_target], and a potentially empty list of names from the relays.
+     * Returns { path: <route>, hops: <count>, distance: <km> } with
+     * <route> set to null if no path found, else <route> is a list of names,
+     * starting with that of [_source] and ending with that of [_target], and
+     * a potentially empty list of names from the relays.
      *
      * All of [_source], [_target], and each relay must have a visible()
      * method that tests the commutative reachability between the method
