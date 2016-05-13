@@ -10,24 +10,34 @@
 
 'use strict';
 
+var shortest = false;
 var argument = process.argv[2];
 
 if (argument === '-h' || argument === '-?' || argument === '--help') {
+    const name = process.argv[1].split('/');
     const deployment = require('./package');
 
-    const name = process.argv[1].split('/');
-    console.info(deployment.description);
+    console.info(deployment.description, '- v' + deployment.version);
     console.info();
     console.info('Usage with a specific data file:');
     console.info();
-    console.info('  ', name[name.length - 1], '<data file>');
+    console.info(' ', name[name.length - 1], '[options]', '<data file>');
     console.info();
     console.info('Usage with a random data file:');
     console.info();
-    console.info('  ', 'curl -s \'https://space-fast-track.herokuapp.com/generate\' |', name[name.length - 1]);
+    console.info(' ', 'curl -s \'https://space-fast-track.herokuapp.com/generate\' |', name[name.length - 1], '[options]');
+    console.info();
+    console.info('Options:');
+    console.info();
+    console.info(' ', '--shortest: Selects the shortest path algorithm over');
+    console.info(' ', '            the default least hops algorithm.');
     console.info();
     process.exit();
+} else if (argument === '--shortest') {
+    shortest = true;
+    argument = process.argv[3];
 }
+
 
 const TRACE = false;
 
@@ -37,14 +47,14 @@ const trace = (TRACE ? console.log : null);
 
 const read = require('./reader');
 const parse = require('./parser').parse;
-const Router = require('./router');
+const Routers = require('./router');
 
 read(argument)
     .then(parse)
     .then(configuration => {
         console.info(configuration.comments.join('\n'));
 
-        const router = new Router(...configuration.satellites);
+        const router = Routers[shortest ? 'shortestPath' : 'leastHops'](...configuration.satellites);
 
         if (trace) trace();
         const route = router.route(configuration.source, configuration.target, trace);
