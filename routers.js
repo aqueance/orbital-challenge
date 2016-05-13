@@ -8,18 +8,27 @@
 
 'use strict';
 
-class Routers {
+const LEAST_HOPS = 'leastHops';
+const SHORTEST_PATH = 'shortestPath';
 
-    static leastHops(...relays) {
-        return new LeastHopsRouter(...relays);
-    }
-
-    static shortestPath(...relays) {
-        return new ShortestPathRouter(...relays);
-    }
-}
-
-module.exports = Routers;
+module.exports = Object.create(null, {
+    factory: {
+        value: Object.create(null, {
+            [LEAST_HOPS]: {
+                value: function(...relays) {
+                    return new LeastHopsRouter(...relays);
+                }
+            },
+            [SHORTEST_PATH]: {
+                value: function(...relays) {
+                    return new ShortestPathRouter(...relays);
+                }
+            }
+        })
+    },
+    LEAST_HOPS: { value: LEAST_HOPS},
+    SHORTEST_PATH: { value: SHORTEST_PATH }
+});
 
 /*
  * Represents a node in a directed graph.

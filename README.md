@@ -49,7 +49,7 @@ The Least Hops algorithm completes in much fewer steps in general but may give s
 
 Every satellite is listed at most once in the returned path in both cases.
 
-The algorithms are fully described in [`router.js`](https://github.com/aqueance/fluid-tools/blob/master/router.js) at the `route` method of the two `*Route` classes.
+The algorithms are fully described in [`routers.js`](https://github.com/aqueance/fluid-tools/blob/master/routers.js) at the `route` method of the two `*Route` classes.
 
 Both algorithms are rather trivial, and properly implementing the coordinate geometry formulae, beautifying the code, and polishing the design took much longer than implementing the algorithms themselves – much less coming up with them.
 
