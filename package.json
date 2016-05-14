@@ -25,7 +25,7 @@
     "npm": ">=3"
   },
   "devDependencies": {
-    "jasmine": "^2",
-    "jshint": "^2"
+    "jasmine": "~2",
+    "jshint": "~2"
   }
 }

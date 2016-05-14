@@ -9,7 +9,7 @@
 'use strict';
 
 const FAST = 'fast';
-const LEAST_HOPS = 'leastHops';
+const FEWEST_HOPS = 'fewestHops';
 const SHORTEST_PATH = 'shortestPath';
 
 module.exports = Object.create(null, {
@@ -20,9 +20,9 @@ module.exports = Object.create(null, {
                     return new FastRouter(...relays);
                 }
             },
-            [LEAST_HOPS]: {
+            [FEWEST_HOPS]: {
                 value: function(...relays) {
-                    return new LeastHopsRouter(...relays);
+                    return new FewestHopsRouter(...relays);
                 }
             },
             [SHORTEST_PATH]: {
@@ -33,7 +33,7 @@ module.exports = Object.create(null, {
         })
     },
     FAST: { value: FAST },
-    LEAST_HOPS: { value: LEAST_HOPS },
+    FEWEST_HOPS: { value: FEWEST_HOPS },
     SHORTEST_PATH: { value: SHORTEST_PATH }
 });
 
@@ -127,7 +127,7 @@ class DescentControl {
 /*
  * Recursively traverses an acyclic directed graph in a depth first manner,
  * maintaining the current total distance and recording the shortest route
- * found with the least number of hops.
+ * found with the fewest number of hops.
  *
  * [control]  controls the descent (see DescentControl)
  * [path]     maintains the current path of descent
@@ -143,15 +143,15 @@ function descend(control, path, length, node, shortest) {
     const trace = control.trace;
     var _node = node.point;
 
-    if (trace) trace('---', _node.name);
+    if (trace) trace(`--- ${_node.name}`);
 
     const _source = control.source.point;
     if (_node.visible(_source)) {
-        if (trace) trace(_node.name, '>', _source.name);
+        if (trace) trace(`${_node.name} > ${_source.name}`);
         var distance = length + _node.distance(_source);
 
         if ((!shortest || shortest.distance > distance || (path.length < shortest.path.length && Math.abs(shortest.distance - distance) < Number.EPSILON))) {
-            if (trace) trace('=', distance, path.slice().reverse().map(node => node.point.name));
+            if (trace) trace(`= ${distance} - ${path.slice().map(node => node.point.name).join(' > ')}`);
             shortest = { path: path.slice(), distance: distance };
         }
     }
@@ -163,7 +163,7 @@ function descend(control, path, length, node, shortest) {
         if (control.descend(node, next)) {
             var _next = next.point;
 
-            if (trace) trace(_node.name, '>', _next.name);
+            if (trace) trace(`${_node.name} > ${_next.name}`);
 
             path.unshift(next);
             shortest = descend(control, path, length + _node.distance(_next), next, shortest);
@@ -216,7 +216,7 @@ function visibility_graph(source, target, relays, trace) {
             .filter(node.visible.bind(node))
             .map(node.connect.bind(node));
 
-        if (trace && visible.length) trace(node.point.name, '<', visible.map(node => node.point.name));
+        if (trace && visible.length) trace(`${node.point.name} < ${visible.map(node => node.point.name)}`);
         return visible.length;
     }
 
@@ -230,7 +230,7 @@ function visibility_graph(source, target, relays, trace) {
 }
 
 /*
- * Finds a route with the least number of hops between a source and a target
+ * Finds a route with the fewest number of hops between a source and a target
  * through a set of relays.
  */
 class FastRouter {
@@ -241,7 +241,7 @@ class FastRouter {
 
     /*
      * This implementation finds a route from [_source] to [_target] with the
-     * least number of hops over the relays.
+     * fewest number of hops over the relays.
      *
      * Returns { path: <route>, hops: <count>, distance: <km> } with
      * <route> set to null if no path found, else <route> is a list of names,
@@ -304,10 +304,10 @@ class FastRouter {
 }
 
 /*
- * Finds the shortest route with the least number of hops between a source and
+ * Finds the shortest route with the fewest number of hops between a source and
  * a target through a set of relays.
  */
-class LeastHopsRouter {
+class FewestHopsRouter {
 
     constructor(...relays) {
         this.relays = relays;
@@ -315,7 +315,7 @@ class LeastHopsRouter {
 
     /*
      * This implementation finds a route from [_source] to [_target] with the
-     * least number of hops over the relays.
+     * fewest number of hops over the relays.
      *
      * Returns { path: <route>, hops: <count>, distance: <km> } with
      * <route> set to null if no path found, else <route> is a list of names,
@@ -354,7 +354,7 @@ class LeastHopsRouter {
 }
 
 /*
- * Finds a route with the shortest total distance and least number of hops
+ * Finds a route with the shortest total distance and fewest number of hops
  * between a source and a target through a set of relays.
  */
 class ShortestPathRouter {

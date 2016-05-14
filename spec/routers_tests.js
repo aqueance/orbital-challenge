@@ -63,8 +63,8 @@ describe('fast router', function() {
     });
 });
 
-describe('least hops router', function() {
-    const variant = routers.LEAST_HOPS;
+describe('fewest hops router', function() {
+    const variant = routers.FEWEST_HOPS;
 
     common_router_checks(variant);
 

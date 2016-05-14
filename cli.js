@@ -10,55 +10,65 @@
 
 'use strict';
 
-const SHORT_PARAM = '--short';
-const FAST_PARAM = '--fast';
+const SHORT = '--short';
+const FAST = '--fast';
 
 function usage() {
     const deployment = require('./package');
+    const command = name[name.length - 1];
 
-    console.info(deployment.description, '- v' + deployment.version);
+    console.info(`${deployment.description} - v${deployment.version}`);
     console.info();
     console.info('Usage with a specific data file:');
     console.info();
-    console.info(' ', name[name.length - 1], '[options]', '<data file>');
+    console.info(`  ${command} [options] <data file>`);
     console.info();
     console.info('Usage with a random data file:');
     console.info();
-    console.info(' ', 'curl -s \'https://space-fast-track.herokuapp.com/generate\' |', name[name.length - 1], '[options]');
+    console.info(`  curl -s \'https://space-fast-track.herokuapp.com/generate\' | ${command} [options]`);
     console.info();
     console.info('Options:');
     console.info();
-    console.info(' ', `-h, -?, --help  Print this text and terminates.`);
-    console.info();
-    console.info(' ', `${SHORT_PARAM}         Selects the shortest path algorithm over the default least`);
-    console.info(' ', `                hops algorithm.`);
-    console.info();
-    console.info(' ', `${FAST_PARAM}:         Selects the fast algorithm over the default least hops.`);
-    console.info(' ', `                algorithm.`);
+    console.info(`  -h, -?, --help  Print this text and terminates.`);
+    console.info(`  ${SHORT}         Selects the shortest path algorithm over the default fewest`);
+    console.info('                  hops algorithm.');
+    console.info(`  ${FAST}          Selects the fast algorithm over the default fewest hops.`);
+    console.info('                  algorithm.');
     console.info();
     process.exit();
 }
 
 var short = false;
 var fast = false;
+var input;
 
 const parameters = process.argv;
 parameters.shift();
 
 const name = parameters.shift().split('/');
-for (var argument = parameters.shift(); argument && !argument.indexOf('-'); argument = parameters.shift()) {
-
-    if (argument === '-h' || argument === '-?' || argument === '--help') {
-        usage();
-    } else if (argument === SHORT_PARAM) {
-        short = true;
-    } else if (argument === FAST_PARAM) {
-        fast = true;
+for (let argument = parameters.shift(); argument; argument = parameters.shift()) {
+    switch (argument) {
+        case '-h':
+            /* fall through */
+        case '-?':
+            /* fall through */
+        case '--help':
+            usage();
+            break;
+        case SHORT:
+            short = true;
+            break;
+        case FAST:
+            fast = true;
+            break;
+        default:
+            input = argument;
+            break;
     }
 }
 
 if (fast && short) {
-    console.info(`Only one of ${SHORT_PARAM} and ${FAST_PARAM} can be specified.`);
+    console.info(`Only one of ${SHORT} and ${FAST} can be specified.`);
     process.exit();
 }
 
@@ -73,22 +83,26 @@ const parse = require('./parser').parse;
 const routers = require('./routers');
 const factory = routers.factory;
 
-read(argument)
+function comments(configuration) {
+    configuration.comments.forEach(comment => console.info(comment));
+}
+
+read(input)
     .then(parse)
     .then(configuration => {
-        console.info(configuration.comments.join('\n'));
-
-        const router = factory[short ? routers.SHORTEST_PATH : fast ? routers.FAST : routers.LEAST_HOPS](...configuration.satellites);
-
-        if (trace) trace();
+        const router = factory[short ? routers.SHORTEST_PATH : fast ? routers.FAST : routers.FEWEST_HOPS](...configuration.satellites);
         const route = router.route(configuration.source, configuration.target, trace);
 
         if (trace) trace();
+
         if (!route.path) {
-            console.info('# No route found');
+            comments(configuration);
+            console.info('#NO ROUTE');
         } else {
+            console.info(`#ALGORITHM: ${short ? 'Shortest Path' : fast ? 'Fast' : 'Fewest Hops'}`);
             console.info(`#METRICS: ${route.distance.toFixed(3)} km over ${route.hops} hops`);
-            console.info(route.path.map(item => item.name).join(' > '));
+            comments(configuration);
+            console.info(route.path.slice(1, -1).map(item => item.name).join(','));
         }
     })
     .catch(console.error);
