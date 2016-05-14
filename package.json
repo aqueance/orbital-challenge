@@ -1,12 +1,13 @@
 {
   "name": "@aqueance/orbital-challenge",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Reaktor Orbital Challenge - https://reaktor.com/orbital-challenge/",
   "author": "Tibor Adam Varga",
   "license": "UNLICENSED",
   "private": true,
   "files": [
     "cli.js",
+    "cli-options.js",
     "reader.js",
     "parser.js",
     "geometry.js",

@@ -25,19 +25,17 @@ function angle2radians(angle) {
  *
  *   See http://keisan.casio.com/exec/system/1359534351
  */
-function spherical2cartesian(coordinates, surface, accuracy = 0) {
+function spherical2cartesian(coordinates, surface = 0, accuracy = 0) {
     var latitude = +coordinates[0];
     var longitude = +coordinates[1];
-    var altitude = (+coordinates[2] || 0) + accuracy;   // elevate things off the surface to make sure lines (of sight) don't touch it
+    var altitude = +coordinates[2] || accuracy;     // elevate things a bit to make sure lines (of sight) don't touch it
 
     var θ = angle2radians(longitude);
     var φ = angle2radians(90 - latitude);
     var r = surface + altitude;
 
-    var cos_θ = Math.cos(θ);
-    var sin_θ = Math.sin(θ);
-    var cos_φ = Math.cos(φ);
-    var sin_φ = Math.sin(φ);
+    var [ sin_θ, cos_θ ] = [ Math.sin(θ), Math.cos(θ) ];
+    var [ sin_φ, cos_φ ] = [ Math.sin(φ), Math.cos(φ) ];
 
     return [
         r * sin_φ * cos_θ,
@@ -46,7 +44,7 @@ function spherical2cartesian(coordinates, surface, accuracy = 0) {
     ];
 }
 
-const ORIGIN = spherical2cartesian([0, 0], 0);
+const ORIGIN = spherical2cartesian([0, 0, 0]);
 
 function difference(u, v) {
     return [
@@ -92,6 +90,7 @@ function _visible(u, v, radius2) {
 }
 
 class Point {
+
     constructor(coordinates) {
         this.coordinates = spherical2cartesian(coordinates, RADIUS, ACCURACY);
     }

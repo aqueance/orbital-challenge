@@ -2,8 +2,6 @@
  * Copyright © Tibor Adam Varga. All rights reserved.
  */
 
-/* See https://reaktor.com/orbital-challenge/ */
-
 /* jshint node:true, esversion:6 */
 
 'use strict';

@@ -2,8 +2,6 @@
  * Copyright © Tibor Adam Varga. All rights reserved.
  */
 
-/* See https://reaktor.com/orbital-challenge/ */
-
 /* jshint node:true, esversion:6 */
 
 'use strict';
@@ -44,9 +42,7 @@ function parse(contents) {
     var comments = [];
 
     contents.split('\n').forEach(function(line) {
-        if (~line.indexOf('#')) {
-            comments.push(line);
-        } else {
+        if (line.indexOf('#')) {
             var parts = line.split(/,\s*/);
             var type = parts.shift();
 
@@ -56,6 +52,8 @@ function parse(contents) {
             } else {
                 satellites.push(new Location(type, parts));
             }
+        } else {
+            comments.push(line);
         }
     });
 
