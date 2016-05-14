@@ -78,8 +78,8 @@ function length_2(u) {
  * that does not touch or cross a sphere with [radius2]^0.5 radius
  * centered at the origin, which is assumed to be at (0, 0, 0).
  *
- * Degenerate cases when [u] or [v] is at or within [radius2]^0.5
- * distance from the origin are not accounted for.
+ * In the degenerate case when [u] and [v] are equal the result is not
+ * specified.
  *
  * See http://mathworld.wolfram.com/Point-LineDistance3-Dimensional.html
  * with [x0] chosen as the origin of the coordinate system,
