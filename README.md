@@ -58,4 +58,44 @@ The algorithms are fully described in `routers.js` at the `route` method of the 
 
 The algorithms are rather trivial, and properly implementing the coordinate geometry formulae, beautifying the code, and polishing the design took much longer than implementing the algorithms themselves – much less coming up with them.
 
+## Performance
+
+To have a feel for the difference in the performance of the various algorithms, turn on tracing by editing `cli.js` and setting the value of the `TRACE` constant to `true`, the run the algorithms through the included sample challenge, described in the next section, and pipe their output to `wc -l`.
+
+## Samples
+
+The longest route any of the algorithms have found so far is for seed `0.8811217630282044`, where the *Shortest Path* algorithm also found a shorter route than the other algorithms.
+
+The challenge data file for that seed is included as `sample-challenge.txt`.
+
+### *Fast* algorithm
+
+```console
+$ comsat --fast sample-challenge.txt
+#ALGORITHM: Fast
+#METRICS: 41511.800 kms over 10 hops
+#SEED: 0.8811217630282044
+SAT1,SAT2,SAT16,SAT6,SAT12,SAT19,SAT18,SAT13,SAT14,SAT4
+```
+
+### *Fewest Hops* algorithm
+
+```console
+$ comsat sample-challenge.txt
+#ALGORITHM: Fewest Hops
+#METRICS: 41511.800 kms over 10 hops
+#SEED: 0.8811217630282044
+SAT1,SAT2,SAT16,SAT6,SAT12,SAT19,SAT18,SAT13,SAT14,SAT4
+```
+
+### *Shortest Path* algorithm
+
+```console
+$ comsat --short sample-challenge.txt
+#ALGORITHM: Shortest Path
+#METRICS: 41506.176 kms over 10 hops
+#SEED: 0.8811217630282044
+SAT11,SAT8,SAT16,SAT6,SAT12,SAT19,SAT18,SAT13,SAT14,SAT4
+```
+
   [Node]: <https://nodejs.org/en/>

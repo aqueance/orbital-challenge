@@ -1,6 +1,6 @@
 {
   "name": "@aqueance/orbital-challenge",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Reaktor Orbital Challenge - https://reaktor.com/orbital-challenge/",
   "author": "Tibor Adam Varga",
   "license": "UNLICENSED",
@@ -10,7 +10,8 @@
     "reader.js",
     "parser.js",
     "geometry.js",
-    "routers.js"
+    "routers.js",
+    "sample-challenge.txt"
   ],
   "bin": {
     "comsat": "cli.js"

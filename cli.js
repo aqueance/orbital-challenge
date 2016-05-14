@@ -10,6 +10,8 @@
 
 'use strict';
 
+const TRACE = false;
+
 const SHORT = '--short';
 const FAST = '--fast';
 
@@ -38,45 +40,44 @@ function usage() {
     process.exit();
 }
 
-var short = false;
-var fast = false;
-var input;
-
 const parameters = process.argv;
 parameters.shift();
 
 const name = parameters.shift().split('/');
-for (let argument = parameters.shift(); argument; argument = parameters.shift()) {
-    switch (argument) {
-        case '-h':
-            /* fall through */
-        case '-?':
-            /* fall through */
-        case '--help':
-            usage();
-            break;
-        case SHORT:
-            short = true;
-            break;
-        case FAST:
-            fast = true;
-            break;
-        default:
-            input = argument;
-            break;
-    }
-}
 
-if (fast && short) {
+const options = parameters.reduce((options, argument) => {
+    switch (argument) {
+    case '-h':
+        /* fall through */
+    case '-?':
+        /* fall through */
+    case '--help':
+        usage();
+        break;
+    case SHORT:
+        options.short = true;
+        break;
+    case FAST:
+        options.fast = true;
+        break;
+    default:
+        options.input = argument;
+        break;
+    }
+
+    return options;
+}, Object.create(null, {
+    short: { value: false, writable: true },
+    fast: { value: false, writable: true },
+    input: { value: undefined, writable: true }
+}));
+
+if (options.fast && options.short) {
     console.info(`Only one of ${SHORT} and ${FAST} can be specified.`);
     process.exit();
 }
 
-const TRACE = false;
-
 const fs = require('fs');
-
-const trace = (TRACE ? console.log : null);
 
 const read = require('./reader');
 const parse = require('./parser').parse;
@@ -87,10 +88,12 @@ function comments(configuration) {
     configuration.comments.forEach(comment => console.info(comment));
 }
 
-read(input)
+const trace = TRACE ? console.log : null;
+
+read(options.input)
     .then(parse)
     .then(configuration => {
-        const router = factory[short ? routers.SHORTEST_PATH : fast ? routers.FAST : routers.FEWEST_HOPS](...configuration.satellites);
+        const router = factory[options.short ? routers.SHORTEST_PATH : options.fast ? routers.FAST : routers.FEWEST_HOPS](...configuration.satellites);
         const route = router.route(configuration.source, configuration.target, trace);
 
         if (trace) trace();
@@ -99,8 +102,8 @@ read(input)
             comments(configuration);
             console.info('#NO ROUTE');
         } else {
-            console.info(`#ALGORITHM: ${short ? 'Shortest Path' : fast ? 'Fast' : 'Fewest Hops'}`);
-            console.info(`#METRICS: ${route.distance.toFixed(3)} km over ${route.hops} hops`);
+            console.info(`#ALGORITHM: ${options.short ? 'Shortest Path' : options.fast ? 'Fast' : 'Fewest Hops'}`);
+            console.info(`#METRICS: ${route.distance.toFixed(3)} kms over ${route.hops} hops`);
             comments(configuration);
             console.info(route.path.slice(1, -1).map(item => item.name).join(','));
         }
