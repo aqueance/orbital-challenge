@@ -28,9 +28,9 @@ function usage(name, output, terminate) {
     output('Options:');
     output();
     output(`  -h, -?, --help  Print this text and terminate.`);
-    output(`  ${SHORT}         Selects the shortest path algorithm over the default fewest`);
-    output('                  hops algorithm.');
-    output(`  ${FAST}          Selects the fast algorithm over the default fewest hops.`);
+    output(`  ${SHORT}         Use the Shortest Path algorithm instead of the default`);
+    output('                  Fewest Hops algorithm.');
+    output(`  ${FAST}          Use the Fast algorithm instead of the default Fewest Hops`);
     output('                  algorithm.');
     output();
 

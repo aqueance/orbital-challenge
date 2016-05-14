@@ -23,19 +23,22 @@ function angle2radians(angle) {
  *   Y pointing East
  *   Z pointing North
  *
- *   See http://keisan.casio.com/exec/system/1359534351
+ * See http://keisan.casio.com/exec/system/1359534351
+ *
+ * [latitude], [longitude], [altitude]: spherical polar coordinates
+ * [surface]                          : what is [altitude] relative to
+ * [accuracy]                         : used to adjust a 0 altitude to elevate
+ *                                      things off the surface so that lines of
+ *                                      sight don't touch the surface on
+ *                                      account of its end points
  */
-function spherical2cartesian(coordinates, surface = 0, accuracy = 0) {
-    var latitude = +coordinates[0];
-    var longitude = +coordinates[1];
-    var altitude = +coordinates[2] || accuracy;     // elevate things a bit to make sure lines (of sight) don't touch it
+function spherical2cartesian([ latitude, longitude, altitude ], surface = 0, accuracy = 0) {
+    const θ = angle2radians(+longitude);
+    const φ = angle2radians(90 - +latitude);
+    const r = surface + (+altitude || accuracy);
 
-    var θ = angle2radians(longitude);
-    var φ = angle2radians(90 - latitude);
-    var r = surface + altitude;
-
-    var [ sin_θ, cos_θ ] = [ Math.sin(θ), Math.cos(θ) ];
-    var [ sin_φ, cos_φ ] = [ Math.sin(φ), Math.cos(φ) ];
+    const [ sin_θ, cos_θ ] = [ Math.sin(θ), Math.cos(θ) ];
+    const [ sin_φ, cos_φ ] = [ Math.sin(φ), Math.cos(φ) ];
 
     return [
         r * sin_φ * cos_θ,
@@ -83,9 +86,9 @@ function length_2(u) {
  * and using [t] without negation or division.
  */
 function _visible(u, v, radius2) {
-    var d = difference(v, u);
-    var l2d = length_2(d);
-    var t = dot_product(d, u);
+    const d = difference(v, u);
+    const l2d = length_2(d);
+    const t = dot_product(d, u);
     return t > 0 || t < -l2d || length_2(cross_product(u, v)) > l2d * radius2;
 }
 

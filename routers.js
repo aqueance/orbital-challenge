@@ -56,7 +56,7 @@ class Node {
     }
 
     visible(that) {
-        var cached = this.cache[that.id];
+        const cached = this.cache[that.id];
         return cached !== undefined ? cached : (this.cache[that.id] = this.point.visible(that.point));
     }
 
@@ -66,14 +66,14 @@ class Node {
     }
 
     encountered(flag) {
-        var value = this.seen;
+        const value = this.seen;
         this.seen = flag;
         return value;
     }
 }
 
 function sanitize(path) {
-    var no_route = path.length === 1;
+    const no_route = path.length === 1;
 
     return {
         path: no_route ? null : path.map(node => node.point),
@@ -89,11 +89,11 @@ function sanitize(path) {
  * returns for each element of [list].
  */
 function divide(list, predicate) {
-    var truthy = [];
-    var falsy = [];
+    const truthy = [];
+    const falsy = [];
 
     for (let i = 0, ii = list.length; i < ii; ++i) {
-        var item = list[i];
+        let item = list[i];
         (predicate(item) ? truthy : falsy).push(item);
     }
 
@@ -101,7 +101,7 @@ function divide(list, predicate) {
 }
 
 /*
- * Exposes details that control the depth first descent through a graph.
+ * Holds details that control the depth first descent through a graph.
  */
 class DescentControl {
 
@@ -139,14 +139,14 @@ class DescentControl {
  */
 function descend(control, path, length, node, shortest) {
     const trace = control.trace;
-    var _node = node.point;
+    const _node = node.point;
 
     if (trace) trace(`--- ${_node.name}`);
 
     const _source = control.source.point;
     if (_node.visible(_source)) {
         if (trace) trace(`${_node.name} > ${_source.name}`);
-        var distance = length + _node.distance(_source);
+        let distance = length + _node.distance(_source);
 
         if ((!shortest || shortest.distance > distance || (path.length < shortest.path.length && Math.abs(shortest.distance - distance) < Number.EPSILON))) {
             if (trace) trace(`= ${distance} - ${path.slice().map(node => node.point.name).join(' > ')}`);
@@ -154,12 +154,12 @@ function descend(control, path, length, node, shortest) {
         }
     }
 
-    var relays = control.relays(node);
+    const relays = control.relays(node);
     for (let i = 0, ii = relays.length; i < ii; ++i) {
         let next = relays[i];
 
         if (control.descend(node, next)) {
-            var _next = next.point;
+            let _next = next.point;
 
             if (trace) trace(`${_node.name} > ${_next.name}`);
 
@@ -174,8 +174,8 @@ function descend(control, path, length, node, shortest) {
 }
 
 function shortest_path(source, target, trace, relays, forward, backward) {
-    var control = new DescentControl(trace, source, relays, forward, backward);
-    var route = descend(control, [], 0, target);
+    const control = new DescentControl(trace, source, relays, forward, backward);
+    const route = descend(control, [], 0, target);
 
     return sanitize((!route ? [] : [ source ].concat(route.path)).concat(target));
 }
@@ -210,7 +210,7 @@ function visibility_graph(source, target, relays, trace) {
      * Returns the number of hits.
      */
     function reachable(node) {
-        var visible = frontier
+        const visible = frontier
             .filter(node.visible.bind(node))
             .map(node.connect.bind(node));
 
@@ -277,8 +277,8 @@ class FastRouter {
      *     e. Add [node] to the beginning of [path].
      */
     route(_source, _target, trace) {
-        var source = new Node(_source);
-        var target = new Node(_target);
+        const source = new Node(_source);
+        const target = new Node(_target);
 
         visibility_graph(source, target, this.relays, trace);
 
@@ -288,10 +288,10 @@ class FastRouter {
         while (node.edges.length) {
             /* jshint -W083 */
 
-            var distances = node.edges.map(last => last.point.distance(node.point));
+            let distances = node.edges.map(last => last.point.distance(node.point));
 
-            var shortest = Math.min.apply(null, distances);
-            var selected = distances.indexOf(shortest);
+            let shortest = Math.min.apply(null, distances);
+            let selected = distances.indexOf(shortest);
 
             node = node.edges[selected];
             path.unshift(node);
@@ -342,8 +342,8 @@ class FewestHopsRouter {
      * shortest one found.
      */
     route(_source, _target, trace) {
-        var source = new Node(_source);
-        var target = new Node(_target);
+        const source = new Node(_source);
+        const target = new Node(_target);
 
         visibility_graph(source, target, this.relays, trace);
 
@@ -385,10 +385,10 @@ class ShortestPathRouter {
      * the total distance when [_source] is reached.
      */
     route(_source, _target, trace) {
-        var source = new Node(_source);
-        var target = new Node(_target);
+        const source = new Node(_source);
+        const target = new Node(_target);
 
-        var relays = this.relays.map((point, index) => new Node(point, index));
+        const relays = this.relays.map((point, index) => new Node(point, index));
         return shortest_path(source, target, trace, node => relays, (node, next) => node.point.visible(next.point) && !next.encountered(true), next => next.encountered(false));
     }
 }

@@ -36,15 +36,16 @@ class ChallengeDetails {
  * Parses the challenge data file from https://space-fast-track.herokuapp.com/generate
  */
 function parse(contents) {
-    var satellites = [];
+    const comments = [];
+    const satellites = [];
+
     var source = null;
     var target = null;
-    var comments = [];
 
     contents.split('\n').forEach(function(line) {
         if (line.indexOf('#')) {
-            var parts = line.split(/,\s*/);
-            var type = parts.shift();
+            let parts = line.split(/,\s*/);
+            let type = parts.shift();
 
             if (type === 'ROUTE') {
                 source = new Location('SOURCE', parts.slice(0, 2));

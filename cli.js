@@ -23,10 +23,6 @@ const parse = require('./parser').parse;
 const routers = require('./routers');
 const factory = routers.factory;
 
-function comments(configuration) {
-    configuration.comments.forEach(comment => console.info(comment));
-}
-
 const trace = TRACE ? console.log : null;
 
 read(options.input)
@@ -48,3 +44,7 @@ read(options.input)
         }
     })
     .catch(console.error);
+
+function comments(configuration) {
+    configuration.comments.forEach(comment => console.info(comment));
+}
