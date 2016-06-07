@@ -60,7 +60,7 @@ The algorithms are rather trivial, and properly implementing the coordinate geom
 
 ## Performance
 
-To have a feel for the difference in the performance of the various algorithms, turn on tracing by editing `cli.js` and setting the value of the `TRACE` constant to `true`, the run the algorithms through the included sample challenge, described in the next section, and pipe their output to `wc -l`.
+To have a feel for the difference in the performance of the various algorithms, turn on tracing by editing `cli.js` and setting the value of the `TRACE` constant to `true`, then run the algorithms through the included sample challenge described in the next section, and pipe their output to `wc -l`.
 
 ## Samples
 
